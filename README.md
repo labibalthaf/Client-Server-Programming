@@ -87,8 +87,7 @@ npm --version
 
 ### 1. Clone repository (branch UAS)
 ```bash
-git clone -b UAS https://github.com/<username>/client-server-programming.git
-cd client-server-programming
+git clone -b UAS https://github.com/labibalthaf/client-server-programming.git
 ```
 
 ### 2. Install dependency
