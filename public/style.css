@@ -1,0 +1,48 @@
+/* ============================================================
+   VoteNow - Custom CSS tambahan
+   Sebagian besar styling memakai Tailwind via CDN.
+   File ini hanya untuk penyesuaian kecil yang sulit lewat utility.
+   ============================================================ */
+
+/* Smooth scroll & font fallback */
+html {
+  scroll-behavior: smooth;
+}
+body {
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Hilangkan spinner pada input (jaga-jaga) */
+input:focus {
+  outline: none;
+}
+
+/* Scrollbar gelap agar serasi dark mode */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 6px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* Animasi halus ketika kartu muncul */
+section {
+  animation: fadeUp 0.35s ease-out;
+}
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

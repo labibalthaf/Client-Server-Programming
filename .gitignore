@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Logs
+npm-debug.log*
+*.log
+
+# Environment
+.env
+.env.local
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Berkas sementara
+_test.js
+_t.js
+*.tmp

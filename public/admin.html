@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VoteNow · Admin</title>
+
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            base: '#0F172A',   // background
+            card: '#1E293B',   // card
+            accent: '#3B82F6', // biru
+          },
+        },
+      },
+    };
+  </script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body class="bg-base text-slate-100 min-h-screen antialiased">
+  <div class="max-w-5xl mx-auto px-4 py-8">
+
+    <!-- HEADER -->
+    <header class="flex items-center justify-between mb-8">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center text-accent text-2xl">📊</div>
+        <div>
+          <h1 class="text-2xl font-bold tracking-tight">VoteNow <span class="text-accent">Admin</span></h1>
+          <p class="text-xs text-slate-400">Voting / Polling Real-Time · UAS Client Server Programming</p>
+        </div>
+      </div>
+
+      <!-- STATUS KONEKSI -->
+      <div id="conn" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-card border border-slate-700 text-sm">
+        <span id="dot" class="w-2.5 h-2.5 rounded-full bg-red-500 transition-colors duration-300"></span>
+        <span id="connText" class="text-slate-300">Menyambungkan…</span>
+      </div>
+    </header>
+
+    <div class="grid md:grid-cols-2 gap-6">
+
+      <!-- ===== KARTU FORM BUAT POLLING ===== -->
+      <section class="bg-card rounded-2xl shadow-lg shadow-black/20 border border-slate-700/60 p-6">
+        <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
+          <span class="text-accent">①</span> Buat Polling
+        </h2>
+
+        <form id="pollForm" class="space-y-4">
+          <div>
+            <label class="block text-sm text-slate-300 mb-1.5">Pertanyaan</label>
+            <input id="question" type="text" maxlength="120"
+              placeholder="Contoh: Bahasa pemrograman favoritmu?"
+              class="w-full rounded-lg bg-base border border-slate-600 px-3 py-2.5 text-sm
+                     focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition" />
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="block text-sm text-slate-300">Opsi Jawaban (min. 2)</label>
+              <span id="optCount" class="text-xs text-slate-500">4 / 10</span>
+            </div>
+
+            <!-- Daftar input opsi (dinamis, dikelola via JS) -->
+            <div id="optList" class="space-y-2"></div>
+
+            <!-- Tombol tambah opsi (opsional, sampai maksimal 10) -->
+            <button type="button" id="addOptBtn"
+              class="mt-2 w-full rounded-lg border border-dashed border-slate-600 text-slate-400 hover:border-accent hover:text-accent transition px-4 py-2 text-sm">
+              + Tambah Opsi
+            </button>
+          </div>
+
+          <div class="flex gap-3 pt-1">
+            <button type="submit"
+              class="flex-1 bg-accent hover:bg-blue-600 active:scale-[.98] transition text-white font-semibold rounded-lg px-4 py-2.5 text-sm shadow-lg shadow-accent/20">
+              Buat Polling
+            </button>
+            <button type="button" id="resetBtn"
+              class="px-4 py-2.5 text-sm rounded-lg border border-slate-600 text-slate-300 hover:bg-slate-700/50 transition">
+              Reset
+            </button>
+          </div>
+
+          <p id="formMsg" class="text-xs h-4"></p>
+        </form>
+      </section>
+
+      <!-- ===== KARTU HASIL LIVE ===== -->
+      <section class="bg-card rounded-2xl shadow-lg shadow-black/20 border border-slate-700/60 p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-semibold flex items-center gap-2">
+            <span class="text-accent">②</span> Hasil Live
+          </h2>
+          <span id="statusBadge" class="text-xs px-2.5 py-1 rounded-full bg-slate-700 text-slate-300">Tidak aktif</span>
+        </div>
+
+        <!-- Placeholder ketika belum ada polling -->
+        <div id="emptyState" class="text-center py-10 text-slate-500 text-sm">
+          Belum ada polling. Buat polling di sebelah kiri.
+        </div>
+
+        <!-- Tampilan polling aktif -->
+        <div id="liveState" class="hidden">
+          <p id="liveQuestion" class="text-base font-medium mb-1"></p>
+          <p class="text-xs text-slate-400 mb-4">Total suara: <span id="totalVotes" class="font-semibold text-slate-200">0</span></p>
+
+          <div id="resultsBars" class="space-y-3"></div>
+
+          <button id="closeBtn"
+            class="mt-6 w-full bg-red-500/90 hover:bg-red-500 active:scale-[.98] transition text-white font-semibold rounded-lg px-4 py-2.5 text-sm shadow-lg shadow-red-500/20">
+            Tutup Polling
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <footer class="text-center text-xs text-slate-600 mt-10">
+      Labib Althaf · NIM 23343042 · Informatika UNP
+    </footer>
+  </div>
+
+  <!-- Socket.IO client -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    // ---- elemen DOM ----
+    const dot        = document.getElementById('dot');
+    const connText   = document.getElementById('connText');
+    const pollForm   = document.getElementById('pollForm');
+    const questionEl = document.getElementById('question');
+    const optList    = document.getElementById('optList');
+    const addOptBtn  = document.getElementById('addOptBtn');
+    const optCount   = document.getElementById('optCount');
+    const formMsg    = document.getElementById('formMsg');
+    const resetBtn   = document.getElementById('resetBtn');
+
+    // ---- pengelolaan input opsi dinamis ----
+    const MIN_OPTIONS = 2;
+    const MAX_OPTIONS = 10;
+    const DEFAULT_OPTIONS = 4;
+
+    // Tambah satu baris input opsi (kosong)
+    function addOptionRow(value = '') {
+      if (optList.children.length >= MAX_OPTIONS) return;
+      const row = document.createElement('div');
+      row.className = 'flex gap-2 items-center';
+      row.innerHTML = `
+        <input type="text" data-opt maxlength="60"
+          class="flex-1 rounded-lg bg-base border border-slate-600 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition" />
+        <button type="button" data-remove
+          class="shrink-0 w-9 h-9 rounded-lg border border-slate-600 text-slate-400 hover:border-red-500 hover:text-red-400 transition flex items-center justify-center">✕</button>`;
+      row.querySelector('[data-opt]').value = value;
+      row.querySelector('[data-remove]').addEventListener('click', () => {
+        row.remove();
+        refreshOptRows();
+      });
+      optList.appendChild(row);
+      refreshOptRows();
+    }
+
+    // Perbarui placeholder, tombol hapus, counter, & status tombol tambah
+    function refreshOptRows() {
+      const rows = [...optList.children];
+      rows.forEach((row, i) => {
+        const input = row.querySelector('[data-opt]');
+        const opsional = i >= MIN_OPTIONS ? ' (opsional)' : '';
+        input.placeholder = `Opsi ${i + 1}${opsional}`;
+        // Tombol hapus hanya aktif bila jumlah opsi > minimum
+        const rm = row.querySelector('[data-remove]');
+        rm.classList.toggle('invisible', rows.length <= MIN_OPTIONS);
+      });
+      optCount.textContent = `${rows.length} / ${MAX_OPTIONS}`;
+      addOptBtn.disabled = rows.length >= MAX_OPTIONS;
+      addOptBtn.classList.toggle('opacity-40', rows.length >= MAX_OPTIONS);
+      addOptBtn.classList.toggle('cursor-not-allowed', rows.length >= MAX_OPTIONS);
+    }
+
+    // Bangun ulang ke kondisi default (DEFAULT_OPTIONS baris kosong)
+    function buildDefaultOptions() {
+      optList.innerHTML = '';
+      for (let i = 0; i < DEFAULT_OPTIONS; i++) addOptionRow('');
+    }
+
+    addOptBtn.addEventListener('click', () => addOptionRow(''));
+    buildDefaultOptions();
+
+    const emptyState   = document.getElementById('emptyState');
+    const liveState    = document.getElementById('liveState');
+    const liveQuestion = document.getElementById('liveQuestion');
+    const totalVotesEl = document.getElementById('totalVotes');
+    const resultsBars  = document.getElementById('resultsBars');
+    const statusBadge  = document.getElementById('statusBadge');
+    const closeBtn     = document.getElementById('closeBtn');
+
+    let currentOptions = [];
+
+    // warna bar bergiliran biar mudah dibedakan (mendukung sampai 10 opsi)
+    const barColors = [
+      'bg-accent', 'bg-emerald-500', 'bg-amber-500', 'bg-pink-500', 'bg-violet-500',
+      'bg-cyan-500', 'bg-orange-500', 'bg-lime-500', 'bg-rose-500', 'bg-teal-500',
+    ];
+
+    // ---- status koneksi ----
+    socket.on('connect', () => {
+      dot.classList.replace('bg-red-500', 'bg-green-500');
+      connText.textContent = 'Terhubung';
+    });
+    socket.on('disconnect', () => {
+      dot.classList.replace('bg-green-500', 'bg-red-500');
+      connText.textContent = 'Terputus';
+    });
+
+    // ---- render bar hasil ----
+    function renderBars(results, total) {
+      resultsBars.innerHTML = '';
+      currentOptions.forEach((opt, i) => {
+        const count = results[opt] || 0;
+        const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+        resultsBars.insertAdjacentHTML('beforeend', `
+          <div>
+            <div class="flex justify-between text-sm mb-1">
+              <span class="text-slate-200">${escapeHtml(opt)}</span>
+              <span class="text-slate-400">${count} · ${pct}%</span>
+            </div>
+            <div class="w-full h-3 rounded-full bg-slate-700/70 overflow-hidden">
+              <div class="h-full ${barColors[i % barColors.length]} rounded-full transition-all duration-500 ease-out"
+                   style="width:${pct}%"></div>
+            </div>
+          </div>`);
+      });
+    }
+
+    // ---- tampilkan polling aktif ----
+    function showLive(question, options) {
+      currentOptions = options;
+      liveQuestion.textContent = question;
+      emptyState.classList.add('hidden');
+      liveState.classList.remove('hidden');
+    }
+
+    function setActiveBadge(active) {
+      if (active) {
+        statusBadge.textContent = 'Aktif';
+        statusBadge.className = 'text-xs px-2.5 py-1 rounded-full bg-green-500/20 text-green-400';
+        closeBtn.disabled = false;
+        closeBtn.classList.remove('opacity-40', 'cursor-not-allowed');
+      } else {
+        statusBadge.textContent = 'Ditutup';
+        statusBadge.className = 'text-xs px-2.5 py-1 rounded-full bg-red-500/20 text-red-400';
+        closeBtn.disabled = true;
+        closeBtn.classList.add('opacity-40', 'cursor-not-allowed');
+      }
+    }
+
+    // ---- event dari server ----
+    socket.on('current_state', (state) => {
+      if (state.poll) {
+        showLive(state.poll.question, state.poll.options);
+        renderBars(state.poll.results, state.totalVotes);
+        totalVotesEl.textContent = state.totalVotes;
+        setActiveBadge(!state.isClosed);
+      } else {
+        liveState.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+        statusBadge.textContent = 'Tidak aktif';
+        statusBadge.className = 'text-xs px-2.5 py-1 rounded-full bg-slate-700 text-slate-300';
+      }
+    });
+
+    socket.on('poll_created', ({ question, options }) => {
+      showLive(question, options);
+      renderBars(emptyResults(options), 0);
+      totalVotesEl.textContent = '0';
+      setActiveBadge(true);
+    });
+
+    socket.on('update_results', ({ results, totalVotes }) => {
+      renderBars(results, totalVotes);
+      totalVotesEl.textContent = totalVotes;
+    });
+
+    socket.on('poll_closed', () => setActiveBadge(false));
+
+    socket.on('poll_reset', () => {
+      liveState.classList.add('hidden');
+      emptyState.classList.remove('hidden');
+      statusBadge.textContent = 'Tidak aktif';
+      statusBadge.className = 'text-xs px-2.5 py-1 rounded-full bg-slate-700 text-slate-300';
+    });
+
+    socket.on('error_msg', ({ message }) => {
+      formMsg.textContent = '⚠ ' + message;
+      formMsg.className = 'text-xs h-4 text-red-400';
+    });
+
+    // ---- aksi admin ----
+    pollForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const question = questionEl.value.trim();
+      // Baca input opsi saat submit (jumlahnya bisa berubah dinamis)
+      const options = [...optList.querySelectorAll('[data-opt]')]
+        .map((i) => i.value.trim())
+        .filter(Boolean);
+      if (!question || options.length < MIN_OPTIONS) {
+        formMsg.textContent = '⚠ Isi pertanyaan dan minimal 2 opsi.';
+        formMsg.className = 'text-xs h-4 text-red-400';
+        return;
+      }
+      if (new Set(options).size !== options.length) {
+        formMsg.textContent = '⚠ Opsi tidak boleh ada yang sama.';
+        formMsg.className = 'text-xs h-4 text-red-400';
+        return;
+      }
+      formMsg.textContent = '';
+      socket.emit('create_poll', { question, options });
+    });
+
+    closeBtn.addEventListener('click', () => socket.emit('close_poll'));
+
+    resetBtn.addEventListener('click', () => {
+      questionEl.value = '';
+      buildDefaultOptions();
+      formMsg.textContent = '';
+      socket.emit('reset_poll');
+    });
+
+    // ---- util ----
+    function emptyResults(options) {
+      const r = {};
+      options.forEach((o) => (r[o] = 0));
+      return r;
+    }
+    function escapeHtml(s) {
+      return s.replace(/[&<>"']/g, (c) => (
+        { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+      ));
+    }
+  </script>
+</body>
+</html>
