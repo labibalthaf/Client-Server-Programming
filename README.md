@@ -1,13 +1,18 @@
-# 🗳️ VoteNow — Aplikasi Voting/Polling Real-Time
+# 🗳️ VoteNow: Aplikasi Voting/Polling Real-Time
 
 Aplikasi voting/polling **real-time** berbasis WebSocket. Admin membuat polling,
 voter memilih, dan **hasil suara langsung diperbarui di semua layar** tanpa reload
 menggunakan Socket.IO.
 
-> **UAS Client Server Programming — Pilihan 7 (Voting/Polling Real-Time)**
+> **UAS Client Server Programming Pilihan 7 (Voting/Polling Real-Time)**
+
 > Nama&nbsp;&nbsp;: **Labib Althaf**
+
 > NIM&nbsp;&nbsp;&nbsp;&nbsp;: **23343042**
-> Prodi&nbsp;: **Informatika — Universitas Negeri Padang (UNP)**
+
+> Dosen Pengampu&nbsp;&nbsp;&nbsp;&nbsp;: **Vikri Aulia, S.Pd., M.Kom.**
+
+> Prodi&nbsp;: **Informatika Universitas Negeri Padang (UNP)**
 
 ---
 
