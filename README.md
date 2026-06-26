@@ -17,9 +17,6 @@ menggunakan Socket.IO.
 |:-------------:|:-------------:|
 | ![Halaman Admin](docs/admin.png) | ![Halaman Voter](docs/voter.png) |
 
-> Letakkan berkas `admin.png` dan `voter.png` di folder [`docs/`](docs/) — lihat
-> [docs/README.md](docs/README.md) untuk panduannya.
-
 ---
 
 ## ✨ Fitur
