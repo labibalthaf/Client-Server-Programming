@@ -1,7 +1,7 @@
 # 🗳️ VoteNow — Aplikasi Voting/Polling Real-Time
 
 Aplikasi voting/polling **real-time** berbasis WebSocket. Admin membuat polling,
-voter memilih, dan **hasil suara langsung diperbarui di semua layar** tanpa reload —
+voter memilih, dan **hasil suara langsung diperbarui di semua layar** tanpa reload
 menggunakan Socket.IO.
 
 > **UAS Client Server Programming — Pilihan 7 (Voting/Polling Real-Time)**
@@ -21,18 +21,18 @@ menggunakan Socket.IO.
 
 ## ✨ Fitur
 
-- **Real-time** — hasil voting diperbarui live ke semua client via WebSocket (Socket.IO).
-- **Halaman Admin** — membuat polling, menambah opsi secara dinamis, menutup polling,
+- **Real-time**: hasil voting diperbarui live ke semua client via WebSocket (Socket.IO).
+- **Halaman Admin**: membuat polling, menambah opsi secara dinamis, menutup polling,
   dan melihat hasil live.
-- **Halaman Voter** — memilih opsi, melihat bar hasil dengan persentase, dan status polling.
-- **Opsi fleksibel** — minimal **2**, maksimal **10** pilihan. Default tampil 4 input,
+- **Halaman Voter**: memilih opsi, melihat bar hasil dengan persentase, dan status polling.
+- **Opsi fleksibel**: minimal **2**, maksimal **10** pilihan. Default tampil 4 input,
   bisa ditambah/dikurangi sesuai kebutuhan.
-- **Anti double-vote** — satu koneksi hanya bisa memilih satu kali (berbasis `socket.id`).
-- **Validasi server** — menolak vote saat belum ada polling, polling sudah ditutup,
+- **Anti double-vote**: satu koneksi hanya bisa memilih satu kali (berbasis `socket.id`).
+- **Validasi server**: menolak vote saat belum ada polling, polling sudah ditutup,
   opsi tidak valid, opsi duplikat, atau jumlah opsi melebihi batas.
-- **Sinkronisasi otomatis** — client yang baru terhubung langsung mendapat state polling
+- **Sinkronisasi otomatis**: client yang baru terhubung langsung mendapat state polling
   yang sedang berjalan (pertanyaan, hasil, status buka/tutup).
-- **Status koneksi** — indikator titik hijau (terhubung) / merah (terputus).
+- **Status koneksi**: indikator titik hijau (terhubung) / merah (terputus).
 - **UI dark mode** responsif & mobile-friendly dengan Tailwind CSS.
 
 ---
@@ -121,14 +121,14 @@ npm run dev
 
 1. Buka **halaman Admin**, isi pertanyaan dan opsi (default 4 input).
    Klik **"+ Tambah Opsi"** untuk menambah pilihan (maks. 10) atau **✕** untuk menghapus.
-2. Klik **"Buat Polling"** — semua halaman voter langsung menampilkan polling.
+2. Klik **"Buat Polling"**, semua halaman voter langsung menampilkan polling.
 3. Di **halaman Voter**, pilih salah satu opsi. Setelah memilih, tombol terkunci dan
    bar hasil muncul serta diperbarui real-time.
 4. Klik **"Tutup Polling"** di Admin untuk menghentikan voting.
    Semua voter tidak bisa memilih lagi dan melihat status *"Polling telah ditutup"*.
 
 > Untuk menguji multi-client: buka beberapa tab/jendela browser ke halaman voter,
-> lalu memilih dari masing-masing tab — semua hasil ter-update bersamaan.
+> lalu memilih dari masing-masing tab, semua hasil ter-update bersamaan.
 
 ---
 
@@ -160,4 +160,4 @@ Rincian lengkap ada di **[HASIL_PENGUJIAN.md](HASIL_PENGUJIAN.md)**.
 
 ## 📝 Lisensi
 
-MIT — bebas digunakan untuk keperluan pembelajaran.
+MIT: bebas digunakan untuk keperluan pembelajaran.
